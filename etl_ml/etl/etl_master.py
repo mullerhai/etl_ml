@@ -15,7 +15,7 @@ logger = logging.getLogger(
 class E_M:
   logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
   logger = logging.getLogger(__name__)
-  def  __init__(self,conf_sec='section_etl_excel_label',config_file='../conf/etl.conf',header=0,encoding='gbk',is_csv=False,csv_sep='\t'):
+  def  __init__(self,conf_sec='section_etl_excel_label',config_file='conf/etl.conf',header=0,encoding='gbk',is_csv=False,csv_sep='\t'):
     # 标准的 入库 列名 顺序  section_etl_excel_label_AA100_p1
     self.std_filed_list = (
     "gid", "realname", "certid", "mobile", "card", "apply_time", "y_label", "apply_amount", "apply_period",
@@ -43,6 +43,7 @@ class E_M:
     self.raw_header_loc_char_dict = ast.literal_eval(l_c_dict_str)
     # 获取当前执行路径
     self.raw_dataframe=None
+    self.ftp_file_dir = None
 
 
 
@@ -74,12 +75,12 @@ class E_M:
 
 
   def get_ftps_client(self,config_ftp_sec='sec_ftps_login'):
-    host = self.config_parser.get(config_ftp_sec, 'ftp_host')
-    user = self.config_parser.get(config_ftp_sec, 'ftp_user')
-    pwd = self.config_parser.get(config_ftp_sec, 'ftp_pwd')
-    port = self.config_parser.get(config_ftp_sec, 'ftp_port')
+    self.host = self.config_parser.get(config_ftp_sec, 'ftp_host')
+    self.user = self.config_parser.get(config_ftp_sec, 'ftp_user')
+    self.pwd = self.config_parser.get(config_ftp_sec, 'ftp_pwd')
+    self.port = self.config_parser.get(config_ftp_sec, 'ftp_port')
     try:
-      cli = Ftps_client(host, user, pwd, port)
+      cli = Ftps_client(self.host, self.user, self.pwd, self.port)
       cli.login(2, True)
       self.Ftps = cli
       self.config_ftp_sec=config_ftp_sec
@@ -91,7 +92,7 @@ class E_M:
     self.get_ftps_client(config_ftp_sec)
     server_path = self.config_parser.get(self.config_ftp_sec, 'ftp_server_path')
     server_file_name=str(upload_etl_file).split(dir_sep)[-1]
-    logger.info(msg="server_file_name : %s host: %s , user : %s ,pwd: %s ,port : %s ,server_path : %s "%(server_file_name,host,user,pwd,port,server_path))
+    logger.info(msg="server_file_name : %s host: %s , user : %s ,pwd: %s ,port : %s ,server_path : %s "%(server_file_name,self.host,self.user,self.pwd,self.port,server_path))
     try:
       logger.info(msg="开始准备上传 %s 到 ftp 服务器" %upload_etl_file)
       self.Ftps.ftpUploadLocalFile(upload_etl_file,server_path,server_file_name)
@@ -141,20 +142,25 @@ class E_M:
 
   def  ftpget_file_server(self,sec_remote_host='sec_remote_host',dir_sep='/'):
     self.get_ssh_client(sec_remote_host)
-    hivehost = self.config_parser.get(sec_remote_host, 'hive_host')
-    hive_server_dir_path = self.config_parser.get(sec_remote_host, 'hive_server_dir_path')
-    ftpget_login = self.config_parser.get(sec_remote_host, 'ftpget_login')
-    ftp_file_dir = self.config_parser.get(sec_remote_host, 'ftp_file_dir')
-    ftp_etl_file = str(self.export_txtfile_path).split(dir_sep)[-1]
+    self.hivehost = self.config_parser.get(sec_remote_host, 'hive_host')
+    if self.hive_server_dir_path ==None:
+      self.hive_server_dir_path = self.config_parser.get(sec_remote_host, 'hive_server_dir_path')
+    self.ftpget_login = self.config_parser.get(sec_remote_host, 'ftpget_login')
+
+    self.ftp_file_dir = self.config_parser.get(sec_remote_host, 'ftp_file_dir')
+    if self.ftp_etl_file ==None:
+      self.ftp_etl_file = str(self.export_txtfile_path).split(dir_sep)[-1]
+    else:
+      self.ftp_etl_file = str(self.ftp_etl_file).split(dir_sep)[-1]
     try:
-      ftp_get_cmd='%s/%s/%s'%(ftpget_login,ftp_file_dir,ftp_etl_file)
-      mv_file_cmd = 'mv  %s  %s ' % (ftp_etl_file, hive_server_dir_path)
+      ftp_get_cmd='%s/%s/%s'%(self.ftpget_login,self.ftp_file_dir,self.ftp_etl_file)
+      mv_file_cmd = 'mv  %s  %s ' % (self.ftp_etl_file, self.hive_server_dir_path)
       logger.info(msg=ftp_get_cmd)
       #ftp_get_cmd ='ssh 172.16.16.31
-      status=self.exec_ssh_command(hivehost,ftp_get_cmd)
+      status=self.exec_ssh_command(self.hivehost,ftp_get_cmd)
       if  status==int(0):
         logger.info(msg=mv_file_cmd)
-        mv_status=self.exec_ssh_command(hivehost,mv_file_cmd)
+        mv_status=self.exec_ssh_command(self.hivehost,mv_file_cmd)
         logger.info(msg="exec second command  mv file command:  success " )
         return mv_status
       else :
