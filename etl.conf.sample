@@ -1,0 +1,45 @@
+[sec_remote_host]
+
+jump_host = 198.48.195.186
+jump_port = 22
+jump_user = ***
+jump_pwd = *****
+tunnel_host = 172.16.16.32
+tunnel_appport = 10000
+local_host = 127.0.0.1
+local_bindport = 4800
+daemon_second=2000
+hive_host=172.16.16.31
+hive_server_dir_path=/home/dm/zhuzheng/fk_data/label_data
+hive_login_port=22
+ftpget_login=lftpget ftp://zhangsan:zztmt@ftps.baidu.com:21
+ftp_file_dir=haining
+
+[sec_ftps_login]
+ftp_host=ftps.baidu.com
+ftp_port=21
+ftp_user=zhangsan
+ftp_pwd=****
+ftp_server_path=/zhangsan/
+
+[sec_push_hive_dir]
+hive_host=172.16.16.31
+server_dir_path=/home/dm/zhangsan/label_data/
+hive_port=10000
+ftpget_login=lftpget ftp://zhangsan:zztmt@ftps.baidu.com:21
+
+
+[section_etl_excel_label]
+encoding=utf-8
+header=0
+file_path = data/demo.xlsx
+sheet_name =sheet1
+sense_code = 分期
+date_Filed = 时间
+phone_Filed = 手机号
+client_nmbr = AA**
+batch = p1
+raw_header_loc_char_dict = {'realname': '*', 'certid': 'h', 'mobile': 'g', 'card': 'e', 'apply_time': 'f',
+                                'y_label': '*', 'apply_amount': '*', 'apply_period': '*', 'overdus_day': '*',
+                                'sense_code': '*'}
+
