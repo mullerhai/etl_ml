@@ -15,7 +15,7 @@ logger = logging.getLogger(
 class E_M:
   logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
   logger = logging.getLogger(__name__)
-  def  __init__(self,conf_sec='section_etl_excel_label',config_file='conf/etl.conf',header=0,encoding='gbk',is_csv=False,csv_sep='\t'):
+  def  __init__(self,conf_sec='section_etl_excel_label',config_file='/Users/geo/Documents/etl_ml/etl_ml/conf/etl.conf',header=0,encoding='gbk',is_csv=False,csv_sep='\t'):
     # 标准的 入库 列名 顺序  section_etl_excel_label_AA100_p1
     self.std_filed_list = (
     "gid", "realname", "certid", "mobile", "card", "apply_time", "y_label", "apply_amount", "apply_period",
